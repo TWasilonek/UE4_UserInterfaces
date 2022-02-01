@@ -18,6 +18,9 @@ public:
 	UTodoListWidget(const FObjectInitializer& ObjectInitializer);
 
 protected:
+	UPROPERTY()
+	class UTasksService* TasksService = nullptr;
+
 	UPROPERTY(meta = (BindWidget))
 		class UButton* AddTaskBtn = nullptr;
 
@@ -35,6 +38,12 @@ protected:
 
 	UPROPERTY(meta = (BindWidget))
 		UWidget* EditTaskView = nullptr;
+
+	UPROPERTY(meta = (BindWidget))
+		class UPanelWidget* TodoList;
+
+	UPROPERTY(meta = (BindWidget))
+		class UPanelWidget* CompletedList;
 
 	virtual bool Initialize() override;
 
