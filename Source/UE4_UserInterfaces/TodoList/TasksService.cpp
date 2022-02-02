@@ -8,12 +8,17 @@ UTasksService::UTasksService()
 	// TODO: Add some tasks for testing
 	FTask task1 = FTask();
 	task1.Text = TEXT("Finish the Task Service");
+	task1.Completed = true;
+	Tasks.Emplace(task1);
 
 	FTask task2 = FTask();
-	task2.Text = TEXT("Add Firebase and HTTP functionality");
-
-	Tasks.Emplace(task1);
+	task2.Text = TEXT("Add Server and HTTP functionality");
 	Tasks.Emplace(task2);
+
+	FTask task3 = FTask();
+	task3.Text = TEXT("Make sure all buttons are doing what they should");
+	Tasks.Emplace(task3);
+	
 }
 
 UTasksService::~UTasksService()

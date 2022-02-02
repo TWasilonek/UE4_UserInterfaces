@@ -2,14 +2,18 @@
 
 
 #include "TodoListWidget.h"
-#include "TasksService.h"
+#include "TaskWidget.h"
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "UObject/ConstructorHelpers.h"
 
 UTodoListWidget::UTodoListWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
-	// TODO: Find the TaskWidget class
+	ConstructorHelpers::FClassFinder<UUserWidget> TaskWidgetBPClass(TEXT("/Game/TodoList/UI/WBP_Task"));
+	if (!ensure(TaskWidgetBPClass.Class != nullptr)) return;
+
+	TaskWidgetClass = TaskWidgetBPClass.Class;
 }
 
 bool UTodoListWidget::Initialize()
@@ -31,10 +35,12 @@ bool UTodoListWidget::Initialize()
 			if (tasks[i].Completed)
 			{
 				// Add it to CompletedList
+				AddToCompletedList(tasks[i]);
 			}
 			else
 			{
 				// Add it to TodoList
+				AddToTodoList(tasks[i]);
 			}
 		}
 	}
@@ -76,4 +82,32 @@ void UTodoListWidget::OpenTaskListView()
 	if (!ensure(ViewSwitcher != nullptr)) return;
 	if (!ensure(TaskListView != nullptr)) return;
 	ViewSwitcher->SetActiveWidget(TaskListView);
+}
+
+void UTodoListWidget::AddToCompletedList(FTask Task)
+{
+	UWorld* World = this->GetWorld();
+	if (!ensure(World != nullptr)) return;
+
+	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
+	if (!ensure(TaskWidget != nullptr)) return;
+	TaskWidget->SetText(Task.Text);
+	TaskWidget->SetCompleted(Task.Completed);
+
+	if (!ensure(CompletedList != nullptr)) return;
+	CompletedList->AddChild(TaskWidget);
+}
+
+void UTodoListWidget::AddToTodoList(FTask Task)
+{
+	UWorld* World = this->GetWorld();
+	if (!ensure(World != nullptr)) return;
+
+	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
+	if (!ensure(TaskWidget != nullptr)) return;
+	TaskWidget->SetText(Task.Text);
+	TaskWidget->SetCompleted(Task.Completed);
+
+	if (!ensure(TodoList != nullptr)) return;
+	TodoList->AddChild(TaskWidget);
 }

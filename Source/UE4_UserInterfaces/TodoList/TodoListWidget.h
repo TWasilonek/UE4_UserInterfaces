@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "TasksService.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "TodoListWidget.generated.h"
@@ -51,9 +52,17 @@ protected:
 	void SaveTask();
 
 private:
+	TSubclassOf<class UUserWidget> TaskWidgetClass;
+
 	UFUNCTION()
 		void OpenEditTaskView();
 
 	UFUNCTION()
 		void OpenTaskListView();
+
+	UFUNCTION()
+		void AddToCompletedList(FTask Task);
+
+	UFUNCTION()
+		void AddToTodoList(FTask Task);
 };
