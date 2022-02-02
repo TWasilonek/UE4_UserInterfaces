@@ -47,7 +47,9 @@ FTask UTasksService::DeleteTaskByIndex(int32 index)
 	if (!Tasks.IsValidIndex(index))
 	{
 		UE_LOG(LogTemp, Error, TEXT("TasksService: invalid index %i"), index);
-		return FTask();
+		FTask ReturnTask = FTask();
+		ReturnTask.Exists = false;
+		return ReturnTask;
 	}
 
 	FTask deletedTask = Tasks[index];
@@ -61,7 +63,9 @@ FTask UTasksService::GetTaskByIndex(int32 index)
 	if (!Tasks.IsValidIndex(index))
 	{
 		UE_LOG(LogTemp, Error, TEXT("TasksService: invalid index %i"), index);
-		return FTask();
+		FTask ReturnTask = FTask();
+		ReturnTask.Exists = false;
+		return ReturnTask;
 	}
 
 	return Tasks[index];

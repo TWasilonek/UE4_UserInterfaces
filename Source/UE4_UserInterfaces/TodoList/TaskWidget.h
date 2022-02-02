@@ -9,6 +9,7 @@
 /**
  * 
  */
+DECLARE_DELEGATE_TwoParams(FOnCompletedChanged, bool, int32) // Param1 = bool bIsCompleted, Param2 = int32 Index
 UCLASS()
 class UE4_USERINTERFACES_API UTaskWidget : public UUserWidget
 {
@@ -19,9 +20,13 @@ public:
 		void SetText(FString text);
 
 	UFUNCTION()
-		void SetCompleted(bool Completed); 
+		void SetCompleted(bool Completed);
 
-private:
+	FORCEINLINE void SetIndex(int32 _Index) { Index = _Index; }
+
+	FOnCompletedChanged OnCompletedChanged;
+
+protected:
 	UPROPERTY(meta = (BindWidget))
 		class UTextBlock* TextField;
 
@@ -33,4 +38,12 @@ private:
 
 	UPROPERTY(meta = (BindWidget))
 		UButton* DeleteBtn;
+
+	virtual bool Initialize() override;
+
+private:
+	int32 Index = -1;
+
+	UFUNCTION()
+		void HandleCompleteCheckboxChange(bool bIsChecked);
 };

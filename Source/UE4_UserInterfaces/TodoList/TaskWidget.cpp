@@ -7,6 +7,16 @@
 #include "Components/CheckBox.h"
 #include "Components/Button.h"
 
+bool UTaskWidget::Initialize()
+{
+	bool Success = Super::Initialize();
+	if (!Success) return false;
+
+	CompletedCheckbox->OnCheckStateChanged.AddDynamic(this, &UTaskWidget::HandleCompleteCheckboxChange);
+
+	return true;
+}
+
 void UTaskWidget::SetText(FString Text)
 {
 	if (!ensure(TextField != nullptr)) return;
@@ -16,13 +26,11 @@ void UTaskWidget::SetText(FString Text)
 void UTaskWidget::SetCompleted(bool Completed)
 {
 	if (!ensure(CompletedCheckbox != nullptr)) return;
+	CompletedCheckbox->SetIsChecked(Completed);
+}
 
-	if (Completed)
-	{
-		CompletedCheckbox->SetCheckedState(ECheckBoxState::Checked);
-	}
-	else
-	{
-		CompletedCheckbox->SetCheckedState(ECheckBoxState::Unchecked);
-	}
+void UTaskWidget::HandleCompleteCheckboxChange(bool bIsChecked)
+{
+	// broadcast
+	OnCompletedChanged.ExecuteIfBound(bIsChecked, Index);
 }

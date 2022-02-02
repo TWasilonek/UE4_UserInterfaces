@@ -6,6 +6,7 @@
 
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "Components/PanelWidget.h"
 #include "UObject/ConstructorHelpers.h"
 
 UTodoListWidget::UTodoListWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
@@ -21,28 +22,11 @@ bool UTodoListWidget::Initialize()
 	bool Success = Super::Initialize();
 	if (!Success) return false;
 
-	// Fill lists
 	TasksService = NewObject<UTasksService>();
 	if (TasksService)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Created a new taks service"));
-		TArray<FTask> tasks = TasksService->GetTasks();
-
-		// TODO: create TaskWidgets for each of the task and add them to the correct Scroll widgets
-		for (int32 i = 0; i < tasks.Num(); i++)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Task: %s completed: %i"), *tasks[i].Text, tasks[i].Completed);
-			if (tasks[i].Completed)
-			{
-				// Add it to CompletedList
-				AddToCompletedList(tasks[i]);
-			}
-			else
-			{
-				// Add it to TodoList
-				AddToTodoList(tasks[i]);
-			}
-		}
+		RefreshTasksLists();
 	}
 
 	if (AddTaskBtn)
@@ -61,6 +45,31 @@ bool UTodoListWidget::Initialize()
 	}
 
 	return true;
+}
+
+void UTodoListWidget::RefreshTasksLists()
+{
+	if (!ensure(TodoList != nullptr)) return;
+	TodoList->ClearChildren();
+
+	if(!ensure(CompletedList != nullptr)) return;
+	CompletedList->ClearChildren();
+
+	if (!ensure(TasksService != nullptr)) return;
+	TArray<FTask> tasks = TasksService->GetTasks();
+
+	for (int32 i = 0; i < tasks.Num(); i++)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Task: %s completed: %i"), *tasks[i].Text, tasks[i].Completed);
+		if (tasks[i].Completed)
+		{
+			AddTaskToCompletedList(tasks[i], i);
+		}
+		else
+		{
+			AddTaskToTodoList(tasks[i], i);
+		}
+	}
 }
 
 void UTodoListWidget::SaveTask()
@@ -84,7 +93,7 @@ void UTodoListWidget::OpenTaskListView()
 	ViewSwitcher->SetActiveWidget(TaskListView);
 }
 
-void UTodoListWidget::AddToCompletedList(FTask Task)
+void UTodoListWidget::AddTaskToCompletedList(FTask Task, int32 Index)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return;
@@ -93,12 +102,15 @@ void UTodoListWidget::AddToCompletedList(FTask Task)
 	if (!ensure(TaskWidget != nullptr)) return;
 	TaskWidget->SetText(Task.Text);
 	TaskWidget->SetCompleted(Task.Completed);
+	TaskWidget->SetIndex(Index);
+
+	TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::HandleTaskCompletedChange);
 
 	if (!ensure(CompletedList != nullptr)) return;
 	CompletedList->AddChild(TaskWidget);
 }
 
-void UTodoListWidget::AddToTodoList(FTask Task)
+void UTodoListWidget::AddTaskToTodoList(FTask Task, int32 Index)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return;
@@ -107,7 +119,22 @@ void UTodoListWidget::AddToTodoList(FTask Task)
 	if (!ensure(TaskWidget != nullptr)) return;
 	TaskWidget->SetText(Task.Text);
 	TaskWidget->SetCompleted(Task.Completed);
+	TaskWidget->SetIndex(Index);
 
 	if (!ensure(TodoList != nullptr)) return;
 	TodoList->AddChild(TaskWidget);
+}
+
+void UTodoListWidget::HandleTaskCompletedChange(bool bIsCompleted, int32 TaskIndex)
+{
+	if (!ensure(TasksService != nullptr)) return;
+
+	FTask UpdatedTask = TasksService->GetTaskByIndex(TaskIndex);
+	if (!UpdatedTask.Exists) return;
+
+	// TODO: Works only when Unchecking
+	UpdatedTask.Completed = bIsCompleted;
+	TasksService->SaveTaskByIndex(TaskIndex, UpdatedTask);
+	
+	RefreshTasksLists();
 }

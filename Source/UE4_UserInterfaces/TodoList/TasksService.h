@@ -13,8 +13,9 @@ struct FTask {
 
 	UPROPERTY() FString Text;
 	UPROPERTY() bool Completed;
+	UPROPERTY() bool Exists;
 
-	FTask() { Completed = false; }
+	FTask() { Completed = false; Exists = true; }
 };
 
 

@@ -61,8 +61,14 @@ private:
 		void OpenTaskListView();
 
 	UFUNCTION()
-		void AddToCompletedList(FTask Task);
+		void AddTaskToCompletedList(FTask Task, int32 Index);
 
 	UFUNCTION()
-		void AddToTodoList(FTask Task);
+		void AddTaskToTodoList(FTask Task, int32 Index);
+
+	UFUNCTION()
+		void HandleTaskCompletedChange(bool bIsCompleted, int32 TaskIndex);
+
+	UFUNCTION()
+		void RefreshTasksLists();
 };
