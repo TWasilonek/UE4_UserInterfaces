@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "TaskInterface.h"
 #include "TaskWidget.generated.h"
 
 /**
@@ -21,6 +22,8 @@ public:
 
 	UFUNCTION()
 		void SetCompleted(bool Completed);
+
+	void SetTaskInterface(ITaskInterface* TaskInterface);
 
 	FORCEINLINE void SetIndex(int32 _Index) { Index = _Index; }
 
@@ -43,7 +46,9 @@ protected:
 
 private:
 	int32 Index = -1;
+	
+	ITaskInterface* TaskInterface = nullptr;
 
 	UFUNCTION()
-		void HandleCompleteCheckboxChange(bool bIsChecked);
+	void HandleCompleteCheckboxChange(bool bIsChecked);
 };

@@ -29,8 +29,17 @@ void UTaskWidget::SetCompleted(bool Completed)
 	CompletedCheckbox->SetIsChecked(Completed);
 }
 
+void UTaskWidget::SetTaskInterface(ITaskInterface* _TaskInterface)
+{
+	this->TaskInterface = _TaskInterface;
+}
+
 void UTaskWidget::HandleCompleteCheckboxChange(bool bIsChecked)
 {
-	// broadcast
+	// broadcast event
 	OnCompletedChanged.ExecuteIfBound(bIsChecked, Index);
+	
+	if (TaskInterface) {
+		TaskInterface->OnCompletedChange(bIsChecked, Index);
+	}
 }

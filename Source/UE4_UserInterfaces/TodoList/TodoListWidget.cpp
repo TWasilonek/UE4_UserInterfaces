@@ -111,7 +111,7 @@ void UTodoListWidget::AddTaskToTodoList(FTask Task, int32 Index)
 	TodoList->AddChild(TaskWidget);
 }
 
-void UTodoListWidget::HandleTaskCompletedChange(bool bIsCompleted, int32 TaskIndex)
+void UTodoListWidget::OnCompletedChange(bool bIsCompleted, int32 TaskIndex)
 {
 	if (!ensure(TasksService != nullptr)) return;
 
@@ -121,7 +121,7 @@ void UTodoListWidget::HandleTaskCompletedChange(bool bIsCompleted, int32 TaskInd
 	UpdatedTask.Completed = bIsCompleted;
 
 	TasksService->SaveTaskByIndex(TaskIndex, UpdatedTask);
-	
+
 	RefreshTasksLists();
 }
 
@@ -137,7 +137,11 @@ UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
 	TaskWidget->SetCompleted(Task.Completed);
 	TaskWidget->SetIndex(Index);
 
-	TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::HandleTaskCompletedChange);
+	/* If you want tot go the Task Interface way (DI) set the interface in TaskWidget */
+	TaskWidget->SetTaskInterface(this);
+
+	/* If you want to go the Event Deletages way - you should register you event handlers in each task */
+	//TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::OnCompletedChange);
 
 	return TaskWidget;
 }

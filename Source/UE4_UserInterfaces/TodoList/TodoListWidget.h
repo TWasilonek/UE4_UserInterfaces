@@ -2,8 +2,9 @@
 
 #pragma once
 
-#include "TasksService.h"
 #include "CoreMinimal.h"
+#include "TasksService.h"
+#include "TaskInterface.h"
 #include "Blueprint/UserWidget.h"
 #include "TodoListWidget.generated.h"
 
@@ -11,7 +12,7 @@
  * 
  */
 UCLASS()
-class UE4_USERINTERFACES_API UTodoListWidget : public UUserWidget
+class UE4_USERINTERFACES_API UTodoListWidget : public UUserWidget, public ITaskInterface
 {
 	GENERATED_BODY()
 
@@ -51,6 +52,10 @@ protected:
 	UFUNCTION()
 	void SaveTask();
 
+	/* ITaskInterface implementation */
+	UFUNCTION()
+		void OnCompletedChange(bool bIsCompleted, int32 TaskIndex) override;
+
 private:
 	TSubclassOf<class UUserWidget> TaskWidgetClass;
 
@@ -65,9 +70,6 @@ private:
 
 	UFUNCTION()
 		void AddTaskToTodoList(FTask Task, int32 Index);
-
-	UFUNCTION()
-		void HandleTaskCompletedChange(bool bIsCompleted, int32 TaskIndex);
 
 	UFUNCTION()
 		void RefreshTasksLists();
