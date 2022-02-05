@@ -71,4 +71,7 @@ private:
 
 	UFUNCTION()
 		void RefreshTasksLists();
+
+	UFUNCTION()
+	UTaskWidget* CreateTaskWidget(FTask Task, int32 Index);
 };

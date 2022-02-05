@@ -95,16 +95,8 @@ void UTodoListWidget::OpenTaskListView()
 
 void UTodoListWidget::AddTaskToCompletedList(FTask Task, int32 Index)
 {
-	UWorld* World = this->GetWorld();
-	if (!ensure(World != nullptr)) return;
-
-	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
+	UTaskWidget* TaskWidget = CreateTaskWidget(Task, Index);
 	if (!ensure(TaskWidget != nullptr)) return;
-	TaskWidget->SetText(Task.Text);
-	TaskWidget->SetCompleted(Task.Completed);
-	TaskWidget->SetIndex(Index);
-
-	TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::HandleTaskCompletedChange);
 
 	if (!ensure(CompletedList != nullptr)) return;
 	CompletedList->AddChild(TaskWidget);
@@ -112,14 +104,8 @@ void UTodoListWidget::AddTaskToCompletedList(FTask Task, int32 Index)
 
 void UTodoListWidget::AddTaskToTodoList(FTask Task, int32 Index)
 {
-	UWorld* World = this->GetWorld();
-	if (!ensure(World != nullptr)) return;
-
-	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
+	UTaskWidget* TaskWidget = CreateTaskWidget(Task, Index);
 	if (!ensure(TaskWidget != nullptr)) return;
-	TaskWidget->SetText(Task.Text);
-	TaskWidget->SetCompleted(Task.Completed);
-	TaskWidget->SetIndex(Index);
 
 	if (!ensure(TodoList != nullptr)) return;
 	TodoList->AddChild(TaskWidget);
@@ -132,9 +118,26 @@ void UTodoListWidget::HandleTaskCompletedChange(bool bIsCompleted, int32 TaskInd
 	FTask UpdatedTask = TasksService->GetTaskByIndex(TaskIndex);
 	if (!UpdatedTask.Exists) return;
 
-	// TODO: Works only when Unchecking
 	UpdatedTask.Completed = bIsCompleted;
+
 	TasksService->SaveTaskByIndex(TaskIndex, UpdatedTask);
 	
 	RefreshTasksLists();
+}
+
+UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
+{
+	UWorld* World = this->GetWorld();
+	if (!ensure(World != nullptr)) return nullptr;
+
+	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
+	if (!ensure(TaskWidget != nullptr)) return nullptr;
+
+	TaskWidget->SetText(Task.Text);
+	TaskWidget->SetCompleted(Task.Completed);
+	TaskWidget->SetIndex(Index);
+
+	TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::HandleTaskCompletedChange);
+
+	return TaskWidget;
 }
