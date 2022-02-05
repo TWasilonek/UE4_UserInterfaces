@@ -9,14 +9,17 @@ UTasksService::UTasksService()
 	FTask task1 = FTask();
 	task1.Text = TEXT("Finish the Task Service");
 	task1.Completed = true;
+	task1.Index = 0;
 	Tasks.Emplace(task1);
 
 	FTask task2 = FTask();
 	task2.Text = TEXT("Add Server and HTTP functionality");
+	task2.Index = 1;
 	Tasks.Emplace(task2);
 
 	FTask task3 = FTask();
 	task3.Text = TEXT("Make sure all buttons are doing what they should");
+	task3.Index = 2;
 	Tasks.Emplace(task3);
 	
 }

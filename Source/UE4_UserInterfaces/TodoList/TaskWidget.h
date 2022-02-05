@@ -51,4 +51,10 @@ private:
 
 	UFUNCTION()
 	void HandleCompleteCheckboxChange(bool bIsChecked);
+
+	UFUNCTION()
+	void HandleEditBtnClicked();
+
+	UFUNCTION()
+	void HandleDeleteBtnClicked();
 };

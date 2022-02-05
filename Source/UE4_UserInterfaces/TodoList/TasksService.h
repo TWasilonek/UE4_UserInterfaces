@@ -14,8 +14,9 @@ struct FTask {
 	UPROPERTY() FString Text;
 	UPROPERTY() bool Completed;
 	UPROPERTY() bool Exists;
+	UPROPERTY() int32 Index; // TODO: this will need to change to Id
 
-	FTask() { Completed = false; Exists = true; }
+	FTask() { Text = ""; Completed = false; Exists = true; Index = -1; }
 };
 
 

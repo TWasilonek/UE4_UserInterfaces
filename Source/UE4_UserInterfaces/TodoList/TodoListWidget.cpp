@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
 #include "Components/PanelWidget.h"
+#include "Components/EditableTextBox.h"
 #include "UObject/ConstructorHelpers.h"
 
 UTodoListWidget::UTodoListWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
@@ -36,12 +37,12 @@ bool UTodoListWidget::Initialize()
 	
 	if (SaveTaskBtn)
 	{
-		SaveTaskBtn->OnClicked.AddDynamic(this, &UTodoListWidget::SaveTask);
+		SaveTaskBtn->OnClicked.AddDynamic(this, &UTodoListWidget::OnSaveTaskPressed);
 	}
 	
 	if (CancelEditTaskBtn)
 	{
-		CancelEditTaskBtn->OnClicked.AddDynamic(this, &UTodoListWidget::OpenTaskListView);
+		CancelEditTaskBtn->OnClicked.AddDynamic(this, &UTodoListWidget::OnCancelEditTaskPressed);
 	}
 
 	return true;
@@ -72,17 +73,18 @@ void UTodoListWidget::RefreshTasksLists()
 	}
 }
 
-void UTodoListWidget::SaveTask()
-{
-	UE_LOG(LogTemp, Warning, TEXT("Saving task"));
-
-	OpenTaskListView();
-}
 
 void UTodoListWidget::OpenEditTaskView()
 {
 	if (!ensure(ViewSwitcher != nullptr)) return;
 	if (!ensure(EditTaskView != nullptr)) return;
+
+	if (TaskTextInput && 
+		EditedTask.Index > -1) // TODO: need a better way to identify Edit Mode and Add Mode
+	{
+		TaskTextInput->SetText(FText::FromString(EditedTask.Text));
+	}
+
 	ViewSwitcher->SetActiveWidget(EditTaskView);
 }
 
@@ -125,6 +127,53 @@ void UTodoListWidget::OnCompletedChange(bool bIsCompleted, int32 TaskIndex)
 	RefreshTasksLists();
 }
 
+void UTodoListWidget::OnCancelEditTaskPressed()
+{
+	ResetEditedTask();
+	OpenTaskListView();
+	RefreshTasksLists();
+}
+
+void UTodoListWidget::OnSaveTaskPressed()
+{
+	if (!ensure(TasksService != nullptr)) return;
+	
+	EditedTask.Text = TaskTextInput->GetText().ToString();
+
+	if (EditedTask.Index > -1) { // TODO: Need a better way to identify Edit Mode
+		// TODO: change to SaveTaskByID
+		TasksService->SaveTaskByIndex(EditedTask.Index, EditedTask);
+	}
+	else
+	{
+		EditedTask.Exists = true;
+		EditedTask.Completed = false;
+		EditedTask.Index = TasksService->GetTasks().Num() + 1; // TODO: Remove this if possible
+		
+		TasksService->AddTask(EditedTask);
+	}
+
+	ResetEditedTask();
+	OpenTaskListView();
+	RefreshTasksLists();
+}
+
+void UTodoListWidget::OnEditTask(int32 Index)
+{
+	if (!ensure(TasksService != nullptr)) return;
+	EditedTask = TasksService->GetTaskByIndex(Index);
+
+	OpenEditTaskView();
+}
+
+void UTodoListWidget::OnDeleteTask(int32 Index)
+{
+	if (!ensure(TasksService != nullptr)) return;
+	TasksService->DeleteTaskByIndex(Index);
+
+	RefreshTasksLists();
+}
+
 UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
 {
 	UWorld* World = this->GetWorld();
@@ -144,4 +193,14 @@ UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
 	//TaskWidget->OnCompletedChanged.BindUObject(this, &UTodoListWidget::OnCompletedChange);
 
 	return TaskWidget;
+}
+
+void UTodoListWidget::ResetEditedTask()
+{
+	if (TaskTextInput)
+	{
+		TaskTextInput->SetText(FText::AsCultureInvariant(""));
+	}
+
+	EditedTask = FTask();
 }

@@ -12,7 +12,20 @@ bool UTaskWidget::Initialize()
 	bool Success = Super::Initialize();
 	if (!Success) return false;
 
-	CompletedCheckbox->OnCheckStateChanged.AddDynamic(this, &UTaskWidget::HandleCompleteCheckboxChange);
+	if (CompletedCheckbox)
+	{
+		CompletedCheckbox->OnCheckStateChanged.AddDynamic(this, &UTaskWidget::HandleCompleteCheckboxChange);
+	}
+	
+	if (EditBtn)
+	{
+		EditBtn->OnClicked.AddDynamic(this, &UTaskWidget::HandleEditBtnClicked);
+	}
+
+	if (DeleteBtn)
+	{
+		DeleteBtn->OnClicked.AddDynamic(this, &UTaskWidget::HandleDeleteBtnClicked);
+	}
 
 	return true;
 }
@@ -39,7 +52,24 @@ void UTaskWidget::HandleCompleteCheckboxChange(bool bIsChecked)
 	// broadcast event
 	OnCompletedChanged.ExecuteIfBound(bIsChecked, Index);
 	
-	if (TaskInterface) {
+	if (TaskInterface) 
+	{
 		TaskInterface->OnCompletedChange(bIsChecked, Index);
+	}
+}
+
+void UTaskWidget::HandleEditBtnClicked()
+{
+	if (TaskInterface)
+	{
+		TaskInterface->OnEditTask(Index);
+	}
+}
+
+void UTaskWidget::HandleDeleteBtnClicked()
+{
+	if (TaskInterface)
+	{
+		TaskInterface->OnDeleteTask(Index);
 	}
 }

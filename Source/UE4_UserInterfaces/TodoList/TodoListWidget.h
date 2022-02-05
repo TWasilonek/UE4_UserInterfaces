@@ -47,17 +47,32 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 		class UPanelWidget* CompletedList;
 
+	UPROPERTY(meta = (BindWidget))
+		class UEditableTextBox* TaskTextInput;
+
 	virtual bool Initialize() override;
 
 	UFUNCTION()
-	void SaveTask();
+	void OnSaveTaskPressed();
+
+	UFUNCTION()
+	void OnCancelEditTaskPressed();
 
 	/* ITaskInterface implementation */
 	UFUNCTION()
 		void OnCompletedChange(bool bIsCompleted, int32 TaskIndex) override;
 
+	UFUNCTION()
+		void OnEditTask(int32 Index) override;
+
+	UFUNCTION()
+		void OnDeleteTask(int32 Index) override;
+	/* ITaskInterface implementation END */
+
 private:
 	TSubclassOf<class UUserWidget> TaskWidgetClass;
+
+	FTask EditedTask = FTask();
 
 	UFUNCTION()
 		void OpenEditTaskView();
@@ -73,6 +88,9 @@ private:
 
 	UFUNCTION()
 		void RefreshTasksLists();
+
+	UFUNCTION()
+		void ResetEditedTask();
 
 	UFUNCTION()
 	UTaskWidget* CreateTaskWidget(FTask Task, int32 Index);
