@@ -3,23 +3,26 @@
 
 #include "TasksService.h"
 
+// TODO: Just for testing
+int32 Id_Base = 0;
+
 UTasksService::UTasksService()
 {
 	// TODO: Add some tasks for testing
 	FTask task1 = FTask();
 	task1.Text = TEXT("Finish the Task Service");
 	task1.Completed = true;
-	task1.Index = 0;
+	task1.Id = FString::FromInt(++Id_Base);
 	Tasks.Emplace(task1);
 
 	FTask task2 = FTask();
 	task2.Text = TEXT("Add Server and HTTP functionality");
-	task2.Index = 1;
+	task2.Id = FString::FromInt(++Id_Base);
 	Tasks.Emplace(task2);
 
 	FTask task3 = FTask();
 	task3.Text = TEXT("Make sure all buttons are doing what they should");
-	task3.Index = 2;
+	task3.Id = FString::FromInt(++Id_Base);
 	Tasks.Emplace(task3);
 	
 }
@@ -28,48 +31,47 @@ UTasksService::~UTasksService()
 {
 }
 
-void UTasksService::AddTask(FTask task)
+void UTasksService::AddTask(FTask *Task)
 {
-	Tasks.Emplace(task);
+	Task->Id = FString::FromInt(++Id_Base);
+	Tasks.Emplace(*Task);
 }
 
-void UTasksService::SaveTaskByIndex(int32 index, FTask task)
+void UTasksService::UpdateTaskById(FString TaskId, FTask* Task)
 {
+	int32 TaskIndex = Tasks.IndexOfByPredicate([TaskId](const FTask& CurrentTask) {
+		return CurrentTask.Id == TaskId;
+		});
 
-	if (!Tasks.IsValidIndex(index))
+	if (TaskIndex == INDEX_NONE)
 	{
-		UE_LOG(LogTemp, Error, TEXT("TasksService: invalid index %i"), index);
+		UE_LOG(LogTemp, Error, TEXT("Could not find task with Id: %s"), *TaskId);
 		return;
 	}
-	
-	Tasks[index] = task;
+
+	Tasks[TaskIndex] = *Task;
 }
 
-FTask UTasksService::DeleteTaskByIndex(int32 index)
+void UTasksService::DeleteTaskById(FString TaskId)
 {
-	if (!Tasks.IsValidIndex(index))
+	int32 TaskIndex = Tasks.IndexOfByPredicate([TaskId](const FTask& CurrentTask) {
+		return CurrentTask.Id == TaskId;
+		});
+
+	if (TaskIndex == INDEX_NONE)
 	{
-		UE_LOG(LogTemp, Error, TEXT("TasksService: invalid index %i"), index);
-		FTask ReturnTask = FTask();
-		ReturnTask.Exists = false;
-		return ReturnTask;
+		UE_LOG(LogTemp, Error, TEXT("Could not find task with Id: %s"), *TaskId);
+		return;
 	}
 
-	FTask deletedTask = Tasks[index];
-	Tasks.RemoveAt(index);
-
-	return deletedTask;
+	Tasks.RemoveAt(TaskIndex);
 }
 
-FTask UTasksService::GetTaskByIndex(int32 index)
+FTask* UTasksService::GetTaskById(FString TaskId)
 {
-	if (!Tasks.IsValidIndex(index))
-	{
-		UE_LOG(LogTemp, Error, TEXT("TasksService: invalid index %i"), index);
-		FTask ReturnTask = FTask();
-		ReturnTask.Exists = false;
-		return ReturnTask;
-	}
-
-	return Tasks[index];
+	return Tasks.FindByPredicate([TaskId](const FTask& Task) 
+		{
+			return Task.Id == TaskId;
+		}
+	);
 }

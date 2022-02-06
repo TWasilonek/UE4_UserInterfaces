@@ -10,7 +10,7 @@
 /**
  * 
  */
-DECLARE_DELEGATE_TwoParams(FOnCompletedChanged, bool, int32) // Param1 = bool bIsCompleted, Param2 = int32 Index
+DECLARE_DELEGATE_TwoParams(FOnCompletedChanged, bool, FString) // Param1 = bool bIsCompleted, Param2 = FString TaskId
 UCLASS()
 class UE4_USERINTERFACES_API UTaskWidget : public UUserWidget
 {
@@ -25,7 +25,7 @@ public:
 
 	void SetTaskInterface(ITaskInterface* TaskInterface);
 
-	FORCEINLINE void SetIndex(int32 _Index) { Index = _Index; }
+	FORCEINLINE void SetTaskId(FString _TaskId) { TaskId = _TaskId;  }
 
 	FOnCompletedChanged OnCompletedChanged;
 
@@ -45,7 +45,7 @@ protected:
 	virtual bool Initialize() override;
 
 private:
-	int32 Index = -1;
+	FString TaskId;
 	
 	ITaskInterface* TaskInterface = nullptr;
 

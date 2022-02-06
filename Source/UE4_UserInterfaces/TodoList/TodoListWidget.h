@@ -60,19 +60,19 @@ protected:
 
 	/* ITaskInterface implementation */
 	UFUNCTION()
-		void OnCompletedChange(bool bIsCompleted, int32 TaskIndex) override;
+		void OnCompletedChange(bool bIsCompleted, FString TaskId) override;
 
 	UFUNCTION()
-		void OnEditTask(int32 Index) override;
+		void OnEditTask(FString TaskId) override;
 
 	UFUNCTION()
-		void OnDeleteTask(int32 Index) override;
+		void OnDeleteTask(FString TaskId) override;
 	/* ITaskInterface implementation END */
 
 private:
 	TSubclassOf<class UUserWidget> TaskWidgetClass;
 
-	FTask EditedTask = FTask();
+	FTask* EditedTask = nullptr;
 
 	UFUNCTION()
 		void OpenEditTaskView();
@@ -81,10 +81,10 @@ private:
 		void OpenTaskListView();
 
 	UFUNCTION()
-		void AddTaskToCompletedList(FTask Task, int32 Index);
+		void AddTaskToCompletedList(FTask Task, FString TaskId);
 
 	UFUNCTION()
-		void AddTaskToTodoList(FTask Task, int32 Index);
+		void AddTaskToTodoList(FTask Task, FString TaskId);
 
 	UFUNCTION()
 		void RefreshTasksLists();
@@ -93,5 +93,5 @@ private:
 		void ResetEditedTask();
 
 	UFUNCTION()
-	UTaskWidget* CreateTaskWidget(FTask Task, int32 Index);
+	UTaskWidget* CreateTaskWidget(FTask Task, FString TaskId);
 };

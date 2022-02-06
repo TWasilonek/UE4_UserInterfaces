@@ -64,25 +64,30 @@ void UTodoListWidget::RefreshTasksLists()
 		UE_LOG(LogTemp, Warning, TEXT("Task: %s completed: %i"), *tasks[i].Text, tasks[i].Completed);
 		if (tasks[i].Completed)
 		{
-			AddTaskToCompletedList(tasks[i], i);
+			AddTaskToCompletedList(tasks[i], tasks[i].Id);
 		}
 		else
 		{
-			AddTaskToTodoList(tasks[i], i);
+			AddTaskToTodoList(tasks[i], tasks[i].Id);
 		}
 	}
 }
-
 
 void UTodoListWidget::OpenEditTaskView()
 {
 	if (!ensure(ViewSwitcher != nullptr)) return;
 	if (!ensure(EditTaskView != nullptr)) return;
 
-	if (TaskTextInput && 
-		EditedTask.Index > -1) // TODO: need a better way to identify Edit Mode and Add Mode
+	if (EditedTask == nullptr)
 	{
-		TaskTextInput->SetText(FText::FromString(EditedTask.Text));
+		EditedTask = new FTask();
+	}
+	else
+	{
+		if (TaskTextInput)
+		{
+			TaskTextInput->SetText(FText::FromString(EditedTask->Text));
+		}
 	}
 
 	ViewSwitcher->SetActiveWidget(EditTaskView);
@@ -95,36 +100,22 @@ void UTodoListWidget::OpenTaskListView()
 	ViewSwitcher->SetActiveWidget(TaskListView);
 }
 
-void UTodoListWidget::AddTaskToCompletedList(FTask Task, int32 Index)
+void UTodoListWidget::AddTaskToCompletedList(FTask Task, FString TaskId)
 {
-	UTaskWidget* TaskWidget = CreateTaskWidget(Task, Index);
+	UTaskWidget* TaskWidget = CreateTaskWidget(Task, TaskId);
 	if (!ensure(TaskWidget != nullptr)) return;
 
 	if (!ensure(CompletedList != nullptr)) return;
 	CompletedList->AddChild(TaskWidget);
 }
 
-void UTodoListWidget::AddTaskToTodoList(FTask Task, int32 Index)
+void UTodoListWidget::AddTaskToTodoList(FTask Task, FString TaskId)
 {
-	UTaskWidget* TaskWidget = CreateTaskWidget(Task, Index);
+	UTaskWidget* TaskWidget = CreateTaskWidget(Task, TaskId);
 	if (!ensure(TaskWidget != nullptr)) return;
 
 	if (!ensure(TodoList != nullptr)) return;
 	TodoList->AddChild(TaskWidget);
-}
-
-void UTodoListWidget::OnCompletedChange(bool bIsCompleted, int32 TaskIndex)
-{
-	if (!ensure(TasksService != nullptr)) return;
-
-	FTask UpdatedTask = TasksService->GetTaskByIndex(TaskIndex);
-	if (!UpdatedTask.Exists) return;
-
-	UpdatedTask.Completed = bIsCompleted;
-
-	TasksService->SaveTaskByIndex(TaskIndex, UpdatedTask);
-
-	RefreshTasksLists();
 }
 
 void UTodoListWidget::OnCancelEditTaskPressed()
@@ -137,20 +128,18 @@ void UTodoListWidget::OnCancelEditTaskPressed()
 void UTodoListWidget::OnSaveTaskPressed()
 {
 	if (!ensure(TasksService != nullptr)) return;
-	
-	EditedTask.Text = TaskTextInput->GetText().ToString();
 
-	if (EditedTask.Index > -1) { // TODO: Need a better way to identify Edit Mode
-		// TODO: change to SaveTaskByID
-		TasksService->SaveTaskByIndex(EditedTask.Index, EditedTask);
+	FTask NewTask = *EditedTask;
+	
+	NewTask.Text = TaskTextInput->GetText().ToString();
+
+	if (NewTask.Id == "") {
+		NewTask.Completed = false;
+		TasksService->AddTask(&NewTask);
 	}
 	else
 	{
-		EditedTask.Exists = true;
-		EditedTask.Completed = false;
-		EditedTask.Index = TasksService->GetTasks().Num() + 1; // TODO: Remove this if possible
-		
-		TasksService->AddTask(EditedTask);
+		TasksService->UpdateTaskById(NewTask.Id, &NewTask);
 	}
 
 	ResetEditedTask();
@@ -158,23 +147,42 @@ void UTodoListWidget::OnSaveTaskPressed()
 	RefreshTasksLists();
 }
 
-void UTodoListWidget::OnEditTask(int32 Index)
+
+void UTodoListWidget::OnCompletedChange(bool bIsCompleted, FString TaskId)
 {
 	if (!ensure(TasksService != nullptr)) return;
-	EditedTask = TasksService->GetTaskByIndex(Index);
 
-	OpenEditTaskView();
-}
+	FTask* FoundTask = TasksService->GetTaskById(TaskId);
+	if (!FoundTask) return;
 
-void UTodoListWidget::OnDeleteTask(int32 Index)
-{
-	if (!ensure(TasksService != nullptr)) return;
-	TasksService->DeleteTaskByIndex(Index);
+	FTask NewTask = *FoundTask;
+	NewTask.Completed = bIsCompleted;
+
+	TasksService->UpdateTaskById(TaskId, &NewTask);
 
 	RefreshTasksLists();
 }
 
-UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
+void UTodoListWidget::OnEditTask(FString TaskId)
+{
+	if (!ensure(TasksService != nullptr)) return;
+	EditedTask = TasksService->GetTaskById(TaskId);
+
+	if (EditedTask != nullptr)
+	{
+		OpenEditTaskView();
+	}
+}
+
+void UTodoListWidget::OnDeleteTask(FString TaskId)
+{
+	if (!ensure(TasksService != nullptr)) return;
+	TasksService->DeleteTaskById(TaskId);
+
+	RefreshTasksLists();
+}
+
+UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, FString TaskId)
 {
 	UWorld* World = this->GetWorld();
 	if (!ensure(World != nullptr)) return nullptr;
@@ -184,7 +192,7 @@ UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, int32 Index)
 
 	TaskWidget->SetText(Task.Text);
 	TaskWidget->SetCompleted(Task.Completed);
-	TaskWidget->SetIndex(Index);
+	TaskWidget->SetTaskId(TaskId);
 
 	/* If you want tot go the Task Interface way (DI) set the interface in TaskWidget */
 	TaskWidget->SetTaskInterface(this);
@@ -202,5 +210,5 @@ void UTodoListWidget::ResetEditedTask()
 		TaskTextInput->SetText(FText::AsCultureInvariant(""));
 	}
 
-	EditedTask = FTask();
+	EditedTask = nullptr;
 }

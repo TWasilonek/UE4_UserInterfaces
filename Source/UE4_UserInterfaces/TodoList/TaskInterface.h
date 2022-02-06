@@ -22,7 +22,7 @@ class UE4_USERINTERFACES_API ITaskInterface
 
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
-	virtual void OnCompletedChange(bool bIsCompleted, int32 Index) = 0;
-	virtual void OnEditTask(int32 Index) = 0;
-	virtual void OnDeleteTask(int32 Index) = 0;
+	virtual void OnCompletedChange(bool bIsCompleted, FString TaskId) = 0;
+	virtual void OnEditTask(FString TaskId) = 0;
+	virtual void OnDeleteTask(FString TaskId) = 0;
 };

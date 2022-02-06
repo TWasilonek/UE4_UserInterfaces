@@ -50,11 +50,11 @@ void UTaskWidget::SetTaskInterface(ITaskInterface* _TaskInterface)
 void UTaskWidget::HandleCompleteCheckboxChange(bool bIsChecked)
 {
 	// broadcast event
-	OnCompletedChanged.ExecuteIfBound(bIsChecked, Index);
+	OnCompletedChanged.ExecuteIfBound(bIsChecked, TaskId);
 	
 	if (TaskInterface) 
 	{
-		TaskInterface->OnCompletedChange(bIsChecked, Index);
+		TaskInterface->OnCompletedChange(bIsChecked, TaskId);
 	}
 }
 
@@ -62,7 +62,7 @@ void UTaskWidget::HandleEditBtnClicked()
 {
 	if (TaskInterface)
 	{
-		TaskInterface->OnEditTask(Index);
+		TaskInterface->OnEditTask(TaskId);
 	}
 }
 
@@ -70,6 +70,6 @@ void UTaskWidget::HandleDeleteBtnClicked()
 {
 	if (TaskInterface)
 	{
-		TaskInterface->OnDeleteTask(Index);
+		TaskInterface->OnDeleteTask(TaskId);
 	}
 }

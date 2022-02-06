@@ -13,10 +13,9 @@ struct FTask {
 
 	UPROPERTY() FString Text;
 	UPROPERTY() bool Completed;
-	UPROPERTY() bool Exists;
-	UPROPERTY() int32 Index; // TODO: this will need to change to Id
+	UPROPERTY() FString Id;
 
-	FTask() { Text = ""; Completed = false; Exists = true; Index = -1; }
+	FTask() { Text = ""; Completed = false; Id = ""; }
 };
 
 
@@ -32,13 +31,13 @@ public:
 	UTasksService();
 	~UTasksService();
 
-	void AddTask(FTask task);
+	void AddTask(FTask* task);
 
-	void SaveTaskByIndex(int32 index, FTask task);
+	void UpdateTaskById(FString TaskId, FTask* Task);
 
-	FTask DeleteTaskByIndex(int32 index);
-	
-	FTask GetTaskByIndex(int32 index);
+	void DeleteTaskById(FString TaskId);
+
+	FTask* GetTaskById(FString TaskId);
 
 	FORCEINLINE TArray<FTask> GetTasks() const { return Tasks; }
 
