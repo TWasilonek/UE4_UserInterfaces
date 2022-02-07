@@ -26,8 +26,8 @@ bool UTodoListWidget::Initialize()
 	TasksService = NewObject<UTasksService>();
 	if (TasksService)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Created a new taks service"));
-		RefreshTasksLists();
+		TasksService->OnTaskListUpdated.BindUObject(this, &UTodoListWidget::RefreshTasksLists);
+		TasksService->FetchTasksList();
 	}
 
 	if (AddTaskBtn)
@@ -57,18 +57,18 @@ void UTodoListWidget::RefreshTasksLists()
 	CompletedList->ClearChildren();
 
 	if (!ensure(TasksService != nullptr)) return;
-	TArray<FTask> tasks = TasksService->GetTasks();
+	TArray<FTask> Tasks = TasksService->GetTasks();
 
-	for (int32 i = 0; i < tasks.Num(); i++)
+	for (int32 i = 0; i < Tasks.Num(); i++)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Task: %s completed: %i"), *tasks[i].Text, tasks[i].Completed);
-		if (tasks[i].Completed)
+		UE_LOG(LogTemp, Warning, TEXT("Task: %s completed: %i"), *Tasks[i].text, Tasks[i].completed);
+		if (Tasks[i].completed)
 		{
-			AddTaskToCompletedList(tasks[i], tasks[i].Id);
+			AddTaskToCompletedList(Tasks[i], Tasks[i].id);
 		}
 		else
 		{
-			AddTaskToTodoList(tasks[i], tasks[i].Id);
+			AddTaskToTodoList(Tasks[i], Tasks[i].id);
 		}
 	}
 }
@@ -86,7 +86,7 @@ void UTodoListWidget::OpenEditTaskView()
 	{
 		if (TaskTextInput)
 		{
-			TaskTextInput->SetText(FText::FromString(EditedTask->Text));
+			TaskTextInput->SetText(FText::FromString(EditedTask->text));
 		}
 	}
 
@@ -131,15 +131,15 @@ void UTodoListWidget::OnSaveTaskPressed()
 
 	FTask NewTask = *EditedTask;
 	
-	NewTask.Text = TaskTextInput->GetText().ToString();
+	NewTask.text = TaskTextInput->GetText().ToString();
 
-	if (NewTask.Id == "") {
-		NewTask.Completed = false;
+	if (NewTask.id == "") {
+		NewTask.completed = false;
 		TasksService->AddTask(&NewTask);
 	}
 	else
 	{
-		TasksService->UpdateTaskById(NewTask.Id, &NewTask);
+		TasksService->UpdateTaskById(NewTask.id, &NewTask);
 	}
 
 	ResetEditedTask();
@@ -156,7 +156,7 @@ void UTodoListWidget::OnCompletedChange(bool bIsCompleted, FString TaskId)
 	if (!FoundTask) return;
 
 	FTask NewTask = *FoundTask;
-	NewTask.Completed = bIsCompleted;
+	NewTask.completed = bIsCompleted;
 
 	TasksService->UpdateTaskById(TaskId, &NewTask);
 
@@ -190,8 +190,8 @@ UTaskWidget* UTodoListWidget::CreateTaskWidget(FTask Task, FString TaskId)
 	UTaskWidget* TaskWidget = CreateWidget<UTaskWidget>(World, TaskWidgetClass);
 	if (!ensure(TaskWidget != nullptr)) return nullptr;
 
-	TaskWidget->SetText(Task.Text);
-	TaskWidget->SetCompleted(Task.Completed);
+	TaskWidget->SetText(Task.text);
+	TaskWidget->SetCompleted(Task.completed);
 	TaskWidget->SetTaskId(TaskId);
 
 	/* If you want tot go the Task Interface way (DI) set the interface in TaskWidget */

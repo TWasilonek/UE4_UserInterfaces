@@ -3,28 +3,17 @@
 
 #include "TasksService.h"
 
+#include "HttpModule.h"
+#include "Interfaces/IHttpResponse.h"
+#include "Json.h"
+#include "JsonUtilities.h"
+
 // TODO: Just for testing
 int32 Id_Base = 0;
 
 UTasksService::UTasksService()
 {
-	// TODO: Add some tasks for testing
-	FTask task1 = FTask();
-	task1.Text = TEXT("Finish the Task Service");
-	task1.Completed = true;
-	task1.Id = FString::FromInt(++Id_Base);
-	Tasks.Emplace(task1);
-
-	FTask task2 = FTask();
-	task2.Text = TEXT("Add Server and HTTP functionality");
-	task2.Id = FString::FromInt(++Id_Base);
-	Tasks.Emplace(task2);
-
-	FTask task3 = FTask();
-	task3.Text = TEXT("Make sure all buttons are doing what they should");
-	task3.Id = FString::FromInt(++Id_Base);
-	Tasks.Emplace(task3);
-	
+	Http = &FHttpModule::Get();
 }
 
 UTasksService::~UTasksService()
@@ -33,14 +22,14 @@ UTasksService::~UTasksService()
 
 void UTasksService::AddTask(FTask *Task)
 {
-	Task->Id = FString::FromInt(++Id_Base);
+	Task->id = FString::FromInt(++Id_Base);
 	Tasks.Emplace(*Task);
 }
 
 void UTasksService::UpdateTaskById(FString TaskId, FTask* Task)
 {
 	int32 TaskIndex = Tasks.IndexOfByPredicate([TaskId](const FTask& CurrentTask) {
-		return CurrentTask.Id == TaskId;
+		return CurrentTask.id == TaskId;
 		});
 
 	if (TaskIndex == INDEX_NONE)
@@ -55,7 +44,7 @@ void UTasksService::UpdateTaskById(FString TaskId, FTask* Task)
 void UTasksService::DeleteTaskById(FString TaskId)
 {
 	int32 TaskIndex = Tasks.IndexOfByPredicate([TaskId](const FTask& CurrentTask) {
-		return CurrentTask.Id == TaskId;
+		return CurrentTask.id == TaskId;
 		});
 
 	if (TaskIndex == INDEX_NONE)
@@ -71,7 +60,64 @@ FTask* UTasksService::GetTaskById(FString TaskId)
 {
 	return Tasks.FindByPredicate([TaskId](const FTask& Task) 
 		{
-			return Task.Id == TaskId;
+			return Task.id == TaskId;
 		}
 	);
+}
+
+void UTasksService::FetchTasksList()
+{
+	if (!ensure(Http != nullptr)) return;
+
+	TSharedRef<IHttpRequest, ESPMode::ThreadSafe> Request = Http->CreateRequest();
+	Request->SetURL(ApiBaseUrl + "/api/tasks");
+	SetRequestHeaders(Request);
+	Request->SetVerb("GET");
+	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnFetchTasksListComplete);
+	Request->ProcessRequest();
+}
+
+void UTasksService::OnFetchTasksListComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	if (!ResponseIsValid(Response, bWasSuccessful)) return;
+
+	FResponse_GetTasksList GetTasksListResponse;
+	GetStructFromJsonString<FResponse_GetTasksList>(Response, GetTasksListResponse);
+
+	Tasks = GetTasksListResponse.tasks;
+
+	// Broadcast
+	OnTaskListUpdated.ExecuteIfBound();
+}
+
+void UTasksService::SetRequestHeaders(TSharedRef<IHttpRequest, ESPMode::ThreadSafe>& Request)
+{
+	Request->SetHeader(TEXT("User-Agent"), TEXT("X-UnrealEngine-Agent"));
+	Request->SetHeader(TEXT("Content-Type"), TEXT("application/json"));
+	Request->SetHeader(TEXT("Accepts"), TEXT("application/json"));
+}
+
+bool UTasksService::ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful)
+{
+	if (!bWasSuccessful || !Response.IsValid()) return false;
+	if (EHttpResponseCodes::IsOk(Response->GetResponseCode())) return true;
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Http Response returned error code: %d"), Response->GetResponseCode());
+		return false;
+	}
+}
+
+/*
+* Utilities - TODO: Move to separate class
+*/
+template <typename StructType>
+void  UTasksService::GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput) {
+	FJsonObjectConverter::UStructToJsonObjectString(StructType::StaticStruct(), &FilledStruct, StringOutput, 0, 0);
+}
+
+template <typename StructType>
+void  UTasksService::GetStructFromJsonString(FHttpResponsePtr Response, StructType& StructOutput) {
+	StructType StructData;
+	FString JsonString = Response->GetContentAsString();
+	FJsonObjectConverter::JsonObjectStringToUStruct<StructType>(JsonString, &StructOutput, 0, 0);
 }
