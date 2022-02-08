@@ -113,14 +113,8 @@ void UTasksService::CreateTaskRequest(FTask* Task)
 	SetRequestHeaders(Request);
 	Request->SetVerb("POST");
 	Request->SetContentAsString(ContentJsonString);
-	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnCreateTaskRequestComplete);
+	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnHttpRequestComplete);
 	Request->ProcessRequest();
-}
-
-void UTasksService::OnCreateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	if (!ResponseIsValid(Response, bWasSuccessful)) return;
-	FetchTasksRequest();
 }
 
 void UTasksService::UpdateTaskRequest(FString TaskId, FTask* Task)
@@ -137,14 +131,8 @@ void UTasksService::UpdateTaskRequest(FString TaskId, FTask* Task)
 	SetRequestHeaders(Request);
 	Request->SetVerb("PUT");
 	Request->SetContentAsString(ContentJsonString);
-	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnUpdateTaskRequestComplete);
+	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnHttpRequestComplete);
 	Request->ProcessRequest();
-}
-
-void UTasksService::OnUpdateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
-{
-	if (!ResponseIsValid(Response, bWasSuccessful)) return;
-	FetchTasksRequest();
 }
 
 void UTasksService::DeleteTaskRequest(FString TaskId)
@@ -155,11 +143,11 @@ void UTasksService::DeleteTaskRequest(FString TaskId)
 	Request->SetURL(ApiBaseUrl + "/api/tasks/" + TaskId + "/delete");
 	SetRequestHeaders(Request);
 	Request->SetVerb("POST");
-	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnDeleteTaskRequestComplete);
+	Request->OnProcessRequestComplete().BindUObject(this, &UTasksService::OnHttpRequestComplete);
 	Request->ProcessRequest();
 }
 
-void UTasksService::OnDeleteTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
+void UTasksService::OnHttpRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
 	if (!ResponseIsValid(Response, bWasSuccessful)) return;
 	FetchTasksRequest();

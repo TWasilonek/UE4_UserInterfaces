@@ -76,13 +76,10 @@ protected:
 	void OnFetchTasksRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void CreateTaskRequest(FTask* Task);
-	void OnCreateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void UpdateTaskRequest(FString TaskId, FTask* Task);
-	void OnUpdateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
-
 	void DeleteTaskRequest(FString TaskId);
-	void OnDeleteTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void OnHttpRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void SetRequestHeaders(TSharedRef<IHttpRequest, ESPMode::ThreadSafe>& Request);
 	bool ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful);
