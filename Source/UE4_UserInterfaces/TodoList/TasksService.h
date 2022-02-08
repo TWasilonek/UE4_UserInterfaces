@@ -20,11 +20,27 @@ struct FTask {
 };
 
 USTRUCT()
-struct FResponse_GetTasksList {
+struct FResponse_FetchTasksList {
 	GENERATED_BODY()
 	UPROPERTY() TArray<FTask> tasks;
 
-	FResponse_GetTasksList() {}
+	FResponse_FetchTasksList() {}
+};
+
+USTRUCT()
+struct FRequest_CreateTask {
+	GENERATED_BODY()
+	UPROPERTY() FTask data;
+
+	FRequest_CreateTask() {}
+};
+
+USTRUCT()
+struct FRequest_UpdateTask {
+	GENERATED_BODY()
+	UPROPERTY() FTask data;
+
+	FRequest_UpdateTask() {}
 };
 
 
@@ -46,7 +62,7 @@ public:
 
 	FTask* GetTaskById(FString TaskId);
 
-	void FetchTasksList();
+	void FetchTasksRequest();
 
 	FORCEINLINE TArray<FTask> GetTasks() const { return Tasks; }
 
@@ -55,14 +71,24 @@ public:
 protected:
 	TArray<FTask> Tasks;
 
-private:
-	FHttpModule* Http;
 	FString ApiBaseUrl = "http://127.0.0.1:3000";
 
-	void OnFetchTasksListComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+	void OnFetchTasksRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void CreateTaskRequest(FTask* Task);
+	void OnCreateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void UpdateTaskRequest(FString TaskId, FTask* Task);
+	void OnUpdateTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
+
+	void DeleteTaskRequest(FString TaskId);
+	void OnDeleteTaskRequestComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful);
 
 	void SetRequestHeaders(TSharedRef<IHttpRequest, ESPMode::ThreadSafe>& Request);
 	bool ResponseIsValid(FHttpResponsePtr Response, bool bWasSuccessful);
+
+private:
+	FHttpModule* Http;
 
 	template <typename StructType>
 	void GetJsonStringFromStruct(StructType FilledStruct, FString& StringOutput);

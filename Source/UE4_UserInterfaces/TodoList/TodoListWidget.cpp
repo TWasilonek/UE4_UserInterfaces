@@ -27,7 +27,7 @@ bool UTodoListWidget::Initialize()
 	if (TasksService)
 	{
 		TasksService->OnTaskListUpdated.BindUObject(this, &UTodoListWidget::RefreshTasksLists);
-		TasksService->FetchTasksList();
+		TasksService->FetchTasksRequest();
 	}
 
 	if (AddTaskBtn)

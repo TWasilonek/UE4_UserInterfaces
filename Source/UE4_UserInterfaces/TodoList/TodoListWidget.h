@@ -60,13 +60,13 @@ protected:
 
 	/* ITaskInterface implementation */
 	UFUNCTION()
-		void OnCompletedChange(bool bIsCompleted, FString TaskId) override;
+	void OnCompletedChange(bool bIsCompleted, FString TaskId) override;
 
 	UFUNCTION()
-		void OnEditTask(FString TaskId) override;
+	void OnEditTask(FString TaskId) override;
 
 	UFUNCTION()
-		void OnDeleteTask(FString TaskId) override;
+	void OnDeleteTask(FString TaskId) override;
 	/* ITaskInterface implementation END */
 
 private:

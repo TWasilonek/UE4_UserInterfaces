@@ -50,7 +50,7 @@ void UTaskWidget::SetTaskInterface(ITaskInterface* _TaskInterface)
 void UTaskWidget::HandleCompleteCheckboxChange(bool bIsChecked)
 {
 	// broadcast event
-	OnCompletedChanged.ExecuteIfBound(bIsChecked, TaskId);
+	//OnCompletedChanged.ExecuteIfBound(bIsChecked, TaskId);
 	
 	if (TaskInterface) 
 	{
