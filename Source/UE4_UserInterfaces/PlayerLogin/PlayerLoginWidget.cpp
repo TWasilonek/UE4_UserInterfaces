@@ -2,19 +2,25 @@
 
 
 #include "PlayerLoginWidget.h"
+#include "AuthService.h"
 
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 
 UPlayerLoginWidget::UPlayerLoginWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
-
 }
 
 bool UPlayerLoginWidget::Initialize()
 {
 	bool Success = Super::Initialize();
 	if (!Success) return false;
+
+	AuthService = NewObject<UAuthService>();
+	if (AuthService)
+	{
+		AuthService->OnLoginSuccess.BindUObject(this, &UPlayerLoginWidget::HandleLoginSuccess);
+	}
 
 	if (LoginBtn)
 	{
@@ -28,6 +34,7 @@ void UPlayerLoginWidget::OnLoginBtnPressed()
 {
 	FString Username = TEXT("");
 	FString Password = TEXT("");
+
 	if (UsernameInput)
 	{
 		Username = UsernameInput->GetText().ToString();
@@ -38,5 +45,13 @@ void UPlayerLoginWidget::OnLoginBtnPressed()
 		Password = PasswordInput->GetText().ToString();
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Login btn pressed. Username: %s Password: %s"), *Username, *Password);
+	if (AuthService)
+	{
+		AuthService->Login(Username, Password);
+	}
+}
+
+void UPlayerLoginWidget::HandleLoginSuccess()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Login successful!"));
 }

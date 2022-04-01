@@ -21,6 +21,7 @@ public:
 	UPlayerLoginWidget(const FObjectInitializer& ObjectInitializer);
 	
 protected:
+	class UAuthService* AuthService = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
 	UEditableTextBox* UsernameInput;
@@ -35,4 +36,7 @@ protected:
 
 	UFUNCTION()
 	void OnLoginBtnPressed();
+
+	UFUNCTION()
+	void HandleLoginSuccess();
 };
