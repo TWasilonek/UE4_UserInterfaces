@@ -4,8 +4,7 @@ import * as Accounts from '../db/accountsDb';
 const router = express.Router();
 
 router.post('/login', (req, res) => {
-    const { data } = req.body;
-    const { username, password } = data;
+    const { username, password  } = req.body;
     
     if (!username || !password) {
         res.status(401).send("Invalid data");
