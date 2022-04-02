@@ -18,10 +18,10 @@ class UE4_USERINTERFACES_API UTaskWidget : public UUserWidget
 
 public:
 	UFUNCTION()
-		void SetText(FString text);
+	void SetText(FString text);
 
 	UFUNCTION()
-		void SetCompleted(bool Completed);
+	void SetCompleted(bool Completed);
 
 	void SetTaskInterface(ITaskInterface* TaskInterface);
 
