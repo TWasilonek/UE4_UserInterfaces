@@ -7,9 +7,9 @@ const router = express.Router();
 router.get('/', (req, res) => {
     try {
         const tasks = Tasks.getTasks();
-        res.status(200).json({ tasks });
+        res.json({ tasks });
     } catch (e) {
-        res.status(500).send('Something went wrong. Try again.\n');
+        res.sendStatus(500);
     }
 });
 
@@ -19,9 +19,9 @@ router.post('/', (req, res) => {
         const { data } = req.body; 
         const newTask = Tasks.createTask(data);
         console.log('Task crated: ', JSON.stringify(newTask));
-        res.status(200).json({ task: newTask });
+        res.json({ task: newTask });
     } catch (e) {
-        res.status(500).send('Something went wrong. Try again.\n');
+        res.sendStatus(500);
     }
 });
 
@@ -32,9 +32,9 @@ router.put('/:taskId', (req, res) => {
         const { data } = req.body;
         const updatedTask = Tasks.updateTask(taskId, data);
         console.log('Task updated: ', JSON.stringify(updatedTask));
-        res.status(200).json({ task: updatedTask });
+        res.json({ task: updatedTask });
     } catch (e) {
-        res.status(500).send('Something went wrong. Try again.\n');
+        res.sendStatus(500);
     }
 });
 
@@ -47,7 +47,7 @@ router.post('/:taskId/delete', (req, res) => {
         console.log('Task deleted');
         res.sendStatus(200);
     } catch (e) {
-        res.status(500).send('Something went wrong. Try again.\n');
+        res.sendStatus(500);
     }
 });
 

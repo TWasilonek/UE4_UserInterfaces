@@ -7,23 +7,23 @@ router.post('/login', (req, res) => {
     const { username, password  } = req.body;
     
     if (!username || !password) {
-        res.status(401).send("Invalid data");
+        res.sendStatus(401);
     }
 
     try {
-        const success = Accounts.login(username, password)
+        const success = Accounts.login(username, password);
         if (!success) {
-            res.status(401);
+            res.sendStatus(401);
         }
-        res.status(200);
+        res.sendStatus(200);
     } catch (e) {
-        res.status(500).send('Something went wrong. Try again.\n');
+        res.sendStatus(500);
     }
 });
 
 router.post('/signup', (req, res) => {
     // TODO: 
-    res.status(500).send('Something went wrong. Try again.\n')
+    res.sendStatus(500);
 });
 
 export default router;
