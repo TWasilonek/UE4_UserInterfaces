@@ -7,15 +7,16 @@ router.post('/login', (req, res) => {
     const { username, password  } = req.body;
     
     if (!username || !password) {
-        res.sendStatus(401);
+        return res.sendStatus(401);
     }
 
     try {
         const success = Accounts.login(username, password);
-        if (!success) {
+        if (success) {
+            res.sendStatus(200);
+        } else {
             res.sendStatus(401);
         }
-        res.sendStatus(200);
     } catch (e) {
         res.sendStatus(500);
     }
