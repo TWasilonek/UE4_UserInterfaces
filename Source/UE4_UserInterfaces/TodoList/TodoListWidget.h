@@ -52,6 +52,8 @@ protected:
 
 	virtual bool Initialize() override;
 
+	void SetupMouseInput();
+
 	UFUNCTION()
 	void OnSaveTaskPressed();
 
