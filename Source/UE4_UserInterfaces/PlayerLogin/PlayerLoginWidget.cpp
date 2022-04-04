@@ -6,6 +6,7 @@
 
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
+#include "Components/TextBlock.h"
 
 UPlayerLoginWidget::UPlayerLoginWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
@@ -20,11 +21,17 @@ bool UPlayerLoginWidget::Initialize()
 	if (AuthService)
 	{
 		AuthService->OnLoginSuccess.BindUObject(this, &UPlayerLoginWidget::HandleLoginSuccess);
+		AuthService->OnLoginError.BindUObject(this, &UPlayerLoginWidget::HandleLoginError);
 	}
 
 	if (LoginBtn)
 	{
 		LoginBtn->OnClicked.AddDynamic(this, &UPlayerLoginWidget::OnLoginBtnPressed);
+	}
+
+	if (ErrorText)
+	{
+		ErrorText->SetVisibility(ESlateVisibility::Collapsed);
 	}
 
 	SetupMouseInput();
@@ -75,4 +82,22 @@ void UPlayerLoginWidget::OnLoginBtnPressed()
 void UPlayerLoginWidget::HandleLoginSuccess()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Login successful!"));
+	// TODO: Travel to the base map
+}
+
+void UPlayerLoginWidget::HandleLoginError(int32 HTTPCode)
+{
+	if (ErrorText)
+	{
+		if (HTTPCode == 401)
+		{
+			ErrorText->SetText(FText::AsCultureInvariant(TEXT("You entered the wrong credentials.")));
+		}
+		else
+		{
+			ErrorText->SetText(FText::AsCultureInvariant(TEXT("Something went wrong, try again later.")));
+		}
+
+		ErrorText->SetVisibility(ESlateVisibility::HitTestInvisible);
+	}
 }

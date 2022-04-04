@@ -7,7 +7,7 @@ export interface PlayerAccount {
 }
 
 let accounts: PlayerAccount[] = [
-    { id: uuidv4(), username: "master1", password: "test" },
+    { id: uuidv4(), username: "admin", password: "admin" },
 ];
 
 export const login = (username: string, password: string) => {

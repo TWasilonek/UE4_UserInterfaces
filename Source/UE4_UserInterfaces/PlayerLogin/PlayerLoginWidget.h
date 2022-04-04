@@ -8,6 +8,7 @@
 
 class UEditableTextBox;
 class UButton;
+class UTextBlock;
 
 /**
  * 
@@ -20,7 +21,7 @@ class UE4_USERINTERFACES_API UPlayerLoginWidget : public UUserWidget
 public:
 	UPlayerLoginWidget(const FObjectInitializer& ObjectInitializer);
 	
-protected:
+private:
 	class UAuthService* AuthService = nullptr;
 
 	UPROPERTY(meta = (BindWidget))
@@ -32,6 +33,9 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	UButton* LoginBtn = nullptr;
 
+	UPROPERTY(meta = (BindWidget))
+	UTextBlock* ErrorText;
+
 	virtual bool Initialize() override;
 
 	void SetupMouseInput();
@@ -41,4 +45,7 @@ protected:
 
 	UFUNCTION()
 	void HandleLoginSuccess();
+
+	UFUNCTION()
+	void HandleLoginError(int32 HTTPCode);
 };

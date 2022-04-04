@@ -36,7 +36,11 @@ void UAuthService::Login(FString Username, FString Password)
 
 void UAuthService::OnLoginComplete(FHttpRequestPtr Request, FHttpResponsePtr Response, bool bWasSuccessful)
 {
-	if (!ResponseIsValid(Response, bWasSuccessful)) return;
+	if (!ResponseIsValid(Response, bWasSuccessful))
+	{
+		OnLoginError.ExecuteIfBound(Response->GetResponseCode());
+		return;
+	}
 	
 	// Broadcast
 	OnLoginSuccess.ExecuteIfBound();

@@ -34,6 +34,7 @@ struct FRequest_Login {
  * 
  */
 DECLARE_DELEGATE(FOnLoginSuccess)
+DECLARE_DELEGATE_OneParam(FOnLoginError, int32) // param1: int32 ErrorCode
 UCLASS()
 class UE4_USERINTERFACES_API UAuthService : public UObject
 {
@@ -46,6 +47,7 @@ public:
 	void Login(FString Username, FString Password);
 
 	FOnLoginSuccess OnLoginSuccess;
+	FOnLoginError OnLoginError;
 
 protected:
 	FString ApiBaseUrl = "http://127.0.0.1:3000";
