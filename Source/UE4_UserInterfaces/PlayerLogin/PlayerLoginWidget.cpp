@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/TextBlock.h"
+#include "Kismet/GameplayStatics.h"
 
 UPlayerLoginWidget::UPlayerLoginWidget(const FObjectInitializer& ObjectInitializer) :Super(ObjectInitializer)
 {
@@ -81,8 +82,10 @@ void UPlayerLoginWidget::OnLoginBtnPressed()
 
 void UPlayerLoginWidget::HandleLoginSuccess()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Login successful!"));
-	// TODO: Travel to the base map
+	FString current = GetWorld()->GetMapName();
+	current.RemoveFromStart(GetWorld()->StreamingLevelsPrefix); // needed when in editor mode
+
+	UGameplayStatics::OpenLevel(this, FName(TEXT("ProtectedMap")));
 }
 
 void UPlayerLoginWidget::HandleLoginError(int32 HTTPCode)
